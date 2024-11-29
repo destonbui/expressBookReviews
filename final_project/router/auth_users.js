@@ -1,28 +1,56 @@
-const express = require('express');
-const jwt = require('jsonwebtoken');
+const express = require("express");
+const jwt = require("jsonwebtoken");
 let books = require("./booksdb.js");
 const regd_users = express.Router();
+require("dotenv").config();
 
 let users = [];
 
-const isValid = (username)=>{ //returns boolean
-//write code to check is the username is valid
-}
+const isValid = (username) => {
+  //returns boolean
+  //write code to check is the username is valid
+};
 
-const authenticatedUser = (username,password)=>{ //returns boolean
-//write code to check if username and password match the one we have in records.
-}
+const authenticatedUser = (username, password) => {
+  //returns boolean
+  //write code to check if username and password match the one we have in records.
+};
 
 //only registered users can login
-regd_users.post("/login", (req,res) => {
+regd_users.post("/login", (req, res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  const { username, password } = req.body;
+  //Missing info
+  if (!username || !password) {
+    return res.status(422).json({ message: "Missing credentials" });
+  }
+
+  //User not registered
+  const isExisted = users.findIndex((user) => user.username === username);
+
+  if (isExisted == -1) {
+    return res.status(409).json({
+      message: "User not registered. Please register before you sign in.",
+    });
+  }
+  //Password check
+  const user = users[isExisted];
+
+  if (user.password !== password) {
+    return res.status(401).json({ message: "Incorrect password" });
+  }
+
+  //If username and password are valid do something below
+  const token = jwt.sign({ username: user.username }, process.env.SECRET, {
+    expiresIn: "1h",
+  });
+  return res.status(200).json({ message: "Customer successfully signed in." });
 });
 
 // Add a book review
 regd_users.put("/auth/review/:isbn", (req, res) => {
   //Write your code here
-  return res.status(300).json({message: "Yet to be implemented"});
+  return res.status(300).json({ message: "Yet to be implemented" });
 });
 
 module.exports.authenticated = regd_users;
