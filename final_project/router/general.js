@@ -36,7 +36,7 @@ public_users.get("/author/:author", function (req, res) {
     (book) => book.author === author
   );
 
-  if (authorBooks) {
+  if (authorBooks.length > 0) {
     return res.status(200).send(JSON.stringify(authorBooks, null, 4));
   } else {
     return res
@@ -48,7 +48,16 @@ public_users.get("/author/:author", function (req, res) {
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
   //Write your code here
-  return res.status(300).json({ message: "Yet to be implemented" });
+  const title = req.params.title;
+  const results = Object.values(books).filter((book) => book.title === title);
+
+  if (results.length > 0) {
+    return res.status(200).send(JSON.stringify(results, null, 4));
+  } else {
+    return res
+      .status(204)
+      .json({ message: "Can not find any books with that title." });
+  }
 });
 
 //  Get book review
