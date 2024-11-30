@@ -69,19 +69,28 @@ public_users.get("/isbn/:isbn", function (req, res) {
 
 // Get book details based on author
 public_users.get("/author/:author", function (req, res) {
-  //Write your code here
   const author = req.params.author;
-  const authorBooks = Object.values(books).filter(
-    (book) => book.author === author
-  );
 
-  if (authorBooks.length > 0) {
-    return res.status(200).send(JSON.stringify(authorBooks, null, 4));
-  } else {
-    return res
-      .status(204)
-      .json({ message: "Can not find any books related to author." });
-  }
+  // Simulating an asynchronous operation with a promise
+  new Promise((resolve, reject) => {
+    const authorBooks = Object.values(books).filter(
+      (book) => book.author === author
+    );
+
+    if (authorBooks.length > 0) {
+      resolve(authorBooks); // Resolve the promise with the filtered books
+    } else {
+      reject("Can not find any books related to author."); // Reject if no books found
+    }
+  })
+    .then((authorBooks) => {
+      // If resolved, send the books in the response
+      return res.status(200).send(JSON.stringify(authorBooks, null, 4));
+    })
+    .catch((error) => {
+      // If rejected, send the error message
+      return res.status(204).json({ message: error });
+    });
 });
 
 // Get all books based on title
