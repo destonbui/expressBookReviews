@@ -95,17 +95,26 @@ public_users.get("/author/:author", function (req, res) {
 
 // Get all books based on title
 public_users.get("/title/:title", function (req, res) {
-  //Write your code here
   const title = req.params.title;
-  const results = Object.values(books).filter((book) => book.title === title);
 
-  if (results.length > 0) {
-    return res.status(200).send(JSON.stringify(results, null, 4));
-  } else {
-    return res
-      .status(204)
-      .json({ message: "Can not find any books with that title." });
-  }
+  // Simulating an asynchronous operation using Promise
+  new Promise((resolve, reject) => {
+    const results = Object.values(books).filter((book) => book.title === title);
+
+    if (results.length > 0) {
+      resolve(results); // Resolve with the results if books are found
+    } else {
+      reject("Can not find any books with that title."); // Reject if no books are found
+    }
+  })
+    .then((results) => {
+      // If promise is resolved, send the results in the response
+      return res.status(200).send(JSON.stringify(results, null, 4));
+    })
+    .catch((error) => {
+      // If promise is rejected, send the error message
+      return res.status(204).json({ message: error });
+    });
 });
 
 //  Get book review
