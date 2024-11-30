@@ -45,13 +45,26 @@ public_users.get("/", function (req, res) {
 public_users.get("/isbn/:isbn", function (req, res) {
   //Write your code here
   const isbn = req.params.isbn;
-  const result = books[isbn];
 
-  if (result) {
-    return res.status(200).send(JSON.stringify(result, null, 4));
-  } else {
-    return res.status(204).json({ message: "Book not found!" });
-  }
+  new Promise((resolve, reject) => {
+    const result = books[isbn];
+
+    if (result) {
+      resolve(result);
+    } else {
+      reject("Book not found.");
+    }
+  })
+    .then((resultData) => {
+      return res.status(200).send(JSON.stringify(resultData, null, 4));
+    })
+    .catch((error) => {
+      if (error === "Book not found.") {
+        res.status(204).json({ message: error });
+      } else {
+        res.status(500).send({ error: error });
+      }
+    });
 });
 
 // Get book details based on author
