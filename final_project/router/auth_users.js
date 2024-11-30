@@ -81,6 +81,42 @@ regd_users.put("/auth/review/:isbn", (req, res) => {
   return res.status(200).send(JSON.stringify(books[isbn], null, 4));
 });
 
+regd_users.delete("/auth/review/:isbn", (req, res) => {
+  const isbn = req.params.isbn;
+  const authHeader = req.header("authorization");
+  let usernameFromToken;
+
+  if (authHeader && authHeader.startsWith("Bearer ")) {
+    const token = authHeader.split(" ")[1];
+
+    try {
+      const { username } = jwt.verify(token, process.env.SECRET);
+      usernameFromToken = username;
+    } catch (error) {
+      if (error.name === "TokenExpiredError") {
+        return res
+          .status(401)
+          .json({ message: "Token has expired. Please log in again." });
+      } else {
+        return res.status(403).json({ message: "Invalid token." });
+      }
+    }
+  } else {
+    return res.status(401).json({ message: "Unauthorized." });
+  }
+
+  //Check if isbn has result in database
+  const result = books[isbn];
+
+  if (!result) {
+    return res.status(204).json({ message: "Book not found!" });
+  }
+
+  delete books[isbn].reviews[usernameFromToken];
+
+  return res.status(200).send(JSON.stringify(books[isbn]), null, 4);
+});
+
 module.exports.authenticated = regd_users;
 module.exports.isValid = isValid;
 module.exports.users = users;
